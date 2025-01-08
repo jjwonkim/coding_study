@@ -1,0 +1,2 @@
+function somethingDangerous() { }
+export default {};

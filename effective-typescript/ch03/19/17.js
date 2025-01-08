@@ -1,0 +1,13 @@
+const cache = {};
+function getQuote(ticker) {
+    if (ticker in cache) {
+        return cache[ticker];
+    }
+    return fetch(`https://quotes.example.com/?q=${ticker}`)
+        .then(response => response.json())
+        .then(quote => {
+        cache[ticker] = quote;
+        return quote;
+    });
+}
+export default {};
