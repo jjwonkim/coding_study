@@ -7,7 +7,7 @@
 # export LANGCHAIN_API_KEY=""
 
 # from langchain_openai import ChatOpenAI
-# llm = ChatOpenAI(api_key='sk-xxx')
+# llm = ChatOpenAI(api_key='')
 # llm.invoke("how can langsmith help with testing?")
 
 
@@ -16,7 +16,7 @@ import openai
 openai.api_key = ""
 
 response = openai.chat.completions.create(
-    model="gpt-3.5-turbo",d
+    model="gpt-3.5-turbo",
     messages=[
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "Who won the world series in 2020?"},
