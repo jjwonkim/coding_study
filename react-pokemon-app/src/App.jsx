@@ -1,38 +1,76 @@
-import { useEffect, useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from "react";
+import axios from "axios";
+import reactLogo from "./assets/react.svg";
+import viteLogo from "/vite.svg";
+import "./App.css";
+import PokeCard from "./components/PokeCard";
 
 function App() {
-  // const [count, setCount] = useState(0)
-  const [pokemon, setPokemon] = useState({})
-  const url = 'https://pokeapi.co/api/v2/pokemon/?limit=1008&offset=0'
+  const [pokemons, setPokemon] = useState([]);
+  const [offset, setOffset] = useState(0);
+  const [limit, setLimit] = useState(20);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     // API => response => state update => component rerender => state
-    fetchPokeData()
-  }, [])
+    fetchPokeData(true);
+  }, []);
 
-  const fetchPokeData = async () => {
+  const fetchPokeData = async (isFirstFetch) => {
     try {
-      // const response = await fetch('https://pokeapi.co/api/v2/pokemon/ditto')
-      // const data = await response.json()
-      // console.log(data)
+      const offsetValeue = isFirstFetch ? 0 : offset + limit;
+      const url = `https://pokeapi.co/api/v2/pokemon/?limit=${limit}&offset=${offsetValeue}`;
       const response = await axios.get(url);
-      console.log(response.data.results);
-      setPokemon(response.data.results);
+      // console.log(response.data.results);
+      setPokemon([...pokemons, ...response.data.results]);
+      // console.log(pokemons);
+      setOffset(offsetValeue);
     } catch (error) {
       console.error(error);
     }
-  }
+  };
 
   return (
-    <div className="App">
-      <h1 class="text-2xl font-bold underline">
-        Hello world!
-      </h1>
-    </div>
-  )
+    <article className="pt-6">
+      <header className="flex flex-col gap-2 w-full px-4 z-50">
+        <div className="relative z-50">
+          <form
+            className="relative flex justify-center items-center w-[20.5rem] h-6 rounded-lg m-auto"
+            action=""
+          >
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={handleSearchInputl}
+              className="text-xs w-[20.5rem] h-6 px-2 py-1 rounded-lg text-gray-300 text-center"
+            />
+            <button type="submit">검색</button>
+          </form>
+        </div>
+      </header>
+      <section className="pt-6 flex flex-col justify-center items-center overflow-auto z-0">
+        <div className="flex flex-row flex-wrap gap-[16px] items-center justify-center px-2 max-w-4xl">
+          {pokemons.length > 0 ? (
+            pokemons.map(({ url, name }, index) => (
+              <PokeCard key={name} url={url} name={name} />
+            ))
+          ) : (
+            <h2 className="font-medium, text-lg text-slate-900 mb-1">
+              포켓몬이 없습니다.
+            </h2>
+          )}
+        </div>
+      </section>
+      <div className="text-center">
+        <button
+          onClick={() => fetchPokeData(false)}
+          className="bg-slate-800 px-6 py-2 my-4 text-base rounded-lg font-bold text-white"
+        >
+          더보기
+        </button>
+      </div>
+    </article>
+  );
 }
 
-export default App
+export default App;
