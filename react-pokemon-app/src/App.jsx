@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axios, { all } from "axios";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
@@ -7,31 +7,44 @@ import PokeCard from "./components/PokeCard";
 import { useDebounce } from "./hooks/useDebounce";
 
 function App() {
-  const [pokemons, setPokemon] = useState([]);
-  const [offset, setOffset] = useState(0);
-  const [limit, setLimit] = useState(20);
-  const [searchTerm, setSearchTerm] = useState("");
+  // 모든 포켓몬 데이터를 가지고 있는 State
+  const [allPokemons, setAllPokemons] = useState([]);
+  // 화면에 보여줄 포켓몬 데이터를 가지고 있는 State
+  const [displayedPokemons, setDisplayedPokemons] = useState([]);
+  // 한번에 보여주는 포캣몬 수
+  const limitNum = 20;
+  const url = `https://pokeapi.co/api/v2/pokemon/?limit=1008&offset=0`;
 
+  const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   useEffect(() => {
     // API => response => state update => component rerender => state
-    fetchPokeData(true);
+    fetchPokeData();
   }, []);
 
   useEffect(() => {
     handleSearchInput(debouncedSearchTerm);
   }, [debouncedSearchTerm]);
 
-  const fetchPokeData = async (isFirstFetch) => {
+  const filterDisplayedPokemonData = (
+    allPokemonsData,
+    displayedPokemonsData = []
+  ) => {
+    const limit = displayedPokemonsData.length + limitNum;
+    // 모든 포켓몬 데이터에서 limitNum만큼 더 가져오기.
+    const array = allPokemonsData.filter((_, index) => index < limit);
+    return array;
+  };
+
+  const fetchPokeData = async () => {
     try {
-      const offsetValeue = isFirstFetch ? 0 : offset + limit;
-      const url = `https://pokeapi.co/api/v2/pokemon/?limit=${limit}&offset=${offsetValeue}`;
+      // 1008개의 포켓몬 데이터를 가져옴
       const response = await axios.get(url);
       // console.log(response.data.results);
-      setPokemon([...pokemons, ...response.data.results]);
-      // console.log(pokemons);
-      setOffset(offsetValeue);
+      setAllPokemons(response.data.results);
+      // 화면에 보여줄 포켓몬 데이터를 20개 가져옴
+      setDisplayedPokemons(filterDisplayedPokemonData(response.data.results));
     } catch (error) {
       console.error(error);
     }
@@ -82,8 +95,8 @@ function App() {
       </header>
       <section className="pt-6 flex flex-col justify-center items-center overflow-auto z-0">
         <div className="flex flex-row flex-wrap gap-[16px] items-center justify-center px-2 max-w-4xl">
-          {pokemons.length > 0 ? (
-            pokemons.map(({ url, name }, index) => (
+          {displayedPokemons.length > 0 ? (
+            displayedPokemons.map(({ url, name }, index) => (
               <PokeCard key={name} url={url} name={name} />
             ))
           ) : (
@@ -94,12 +107,19 @@ function App() {
         </div>
       </section>
       <div className="text-center">
-        <button
-          onClick={() => fetchPokeData(false)}
-          className="bg-slate-800 px-6 py-2 my-4 text-base rounded-lg font-bold text-white"
-        >
-          더보기
-        </button>
+        {allPokemons.length > displayedPokemons.length &&
+          displayedPokemons.length !== 1 && (
+            <button
+              onClick={() =>
+                setDisplayedPokemons(
+                  filterDisplayedPokemonData(allPokemons, displayedPokemons)
+                )
+              }
+              className="bg-slate-800 px-6 py-2 my-4 text-base rounded-lg font-bold text-white"
+            >
+              더보기
+            </button>
+          )}
       </div>
     </article>
   );
