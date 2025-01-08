@@ -28,6 +28,6 @@ export default {
         none: "#BfBfBf",
       },
     },
-    plugins: [],
+    plugins: [require("tailwind-scrollbar")],
   },
 };

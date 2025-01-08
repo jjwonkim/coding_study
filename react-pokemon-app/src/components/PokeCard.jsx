@@ -8,7 +8,7 @@ const PokeCard = ({ url, name }) => {
   useEffect(() => {
     fetchPokeDetailData();
     return () => {
-      console.log("PokeCard unmounted");
+      // console.log("PokeCard unmounted");
     };
   }, []);
 
