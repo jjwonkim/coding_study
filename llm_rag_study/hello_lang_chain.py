@@ -4,16 +4,16 @@
 # llm.invoke("What is stock?")
 
 # export LANGCHAIN_TRACING_V2="true"
-# export LANGCHAIN_API_KEY="sk-None-xzbn6U1nBhNYJOLomipYT3BlbkFJXmLyme80WeMRna921VI4"
+# export LANGCHAIN_API_KEY=""
 
 # from langchain_openai import ChatOpenAI
-# llm = ChatOpenAI(api_key='sk-None-xzbn6U1nBhNYJOLomipYT3BlbkFJXmLyme80WeMRna921VI4')
+# llm = ChatOpenAI(api_key='sk-xxx')
 # llm.invoke("how can langsmith help with testing?")
 
 
 import openai
 
-openai.api_key = "sk-None-xzbn6U1nBhNYJOLomipYT3BlbkFJXmLyme80WeMRna921VI4"
+openai.api_key = ""
 
 response = openai.chat.completions.create(
     model="gpt-3.5-turbo",d
