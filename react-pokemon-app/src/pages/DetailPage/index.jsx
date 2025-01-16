@@ -1,6 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { Loading } from "../../assets/Loading";
+import { LessThan } from "../../assets/LessThan";
+import { GreaterThan } from "../../assets/GreaterThan";
 
 const DetailPage = () => {
   const [pokemon, setPokemon] = useState();
@@ -25,8 +28,9 @@ const DetailPage = () => {
         const nextAndPreviousPokemon = await getNextAndPreviousPokemon(id);
 
         const damageRelations = await Promise.all(
-          types.map(async (i) => {
-            const type = await axios.get(i.type.url);
+          types.map(async (obj) => {
+            console.log(obj);
+            const type = await axios.get(obj.type.url);
             return type.data.damage_relations;
           })
         );
@@ -40,6 +44,7 @@ const DetailPage = () => {
           next: nextAndPreviousPokemon.next,
           abilities: formatPokemonAbilities(abilities),
           stats: formatPokemonStats(stats),
+          types: types.map((obj) => obj.type.name),
           damageRelations,
         };
         setPokemon(formattedPokemonData);
@@ -47,6 +52,7 @@ const DetailPage = () => {
       }
     } catch (error) {
       console.error(error);
+      setIsLoading(false);
     }
   }
 
@@ -76,12 +82,12 @@ const DetailPage = () => {
     const urlPokemon = `${baseUrl}?limit=1&offset=${id - 1}`;
 
     const { data: pokenmonData } = await axios.get(urlPokemon);
-    console.log(pokenmonData);
 
     const nextResponse =
       pokenmonData.next && (await axios.get(pokenmonData.next));
     const previousResponse =
       pokenmonData.previous && (await axios.get(pokenmonData.previous));
+    console.log(nextResponse, previousResponse);
     return {
       next: nextResponse?.data?.results?.[0]?.name,
       previous: previousResponse?.data?.results?.[0]?.name,
@@ -89,10 +95,47 @@ const DetailPage = () => {
   }
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div
+        className={`absolute h-auto w-auto top-1/3 -tranlate-x-1/2 left-1/2 z-50`}
+      >
+        <Loading className="w-12 h-12 z-50 animate-spin text-slate-900 " />
+      </div>
+    );
+  } else if (!pokemon) {
+    return <div>...Not Found</div>;
   }
 
-  return <div>DetailPage</div>;
+  const img = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon?.id}.png`;
+  const bg = `bg-${pokemon?.types?.[0]}`;
+  const text = `text-${pokemon?.types?.[0]}`;
+  console.log(bg, text);
+
+  return (
+    <article className="flex items-center gap-1 flex-col w-full">
+      <div
+        className={`${bg} w-auto h-full flex flex-col z-0 items-center justify-end relative overflow-hidden`}
+      >
+        {pokemon.previous && (
+          <Link
+            className="absolute top-[40%] -translate-y-1/2 z-50 left-1"
+            to={`/pokemon/${pokemon.previous}`}
+          >
+            <LessThan className="w-5 h-8 p-1" />
+          </Link>
+        )}
+        "AAAAAA"
+        {pokemon.next && (
+          <Link
+            className="absolute top-[40%] -translate-y-1/2 z-50 right-1"
+            to={`/pokemon/${pokemon.next}`}
+          >
+            <GreaterThan className="w-5 h-8 p-1" />
+          </Link>
+        )}
+      </div>
+    </article>
+  );
 };
 
 export default DetailPage;
